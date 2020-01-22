@@ -9,10 +9,8 @@ let Application = PIXI.Application,
     Texture = PIXI.Texture,
     loader = PIXI.Loader.shared.loader;
 
-// const appWidth = window.innerWidth;
-// const appHeight = window.innerHeight;
-const appWidth = 500;
-const appHeight = 500;
+let appWidth = window.innerWidth
+let appHeight = window.innerHeight;
 
 // initiate the application
 let app = new Application({
@@ -35,10 +33,12 @@ document.body.appendChild(app.view);
 let startTime;
 let foodSources = new Set();
 
-let herbivore;
-
 /** Initiates game state by adding all default creatures */
-function setup() {
+let herbivore;
+setup();
+ 
+ /** Initiates game state by adding all default creatures */
+ function setup() {
     // Initial Conditions
     const initialSourcesOfFood = 2;
 
@@ -52,7 +52,6 @@ function setup() {
 
     // add the initial creatures
     let coordinates = generateRandomCoordinates();
-    console.log(coordinates);
     herbivore = new Herbivore(coordinates.x, coordinates.y);
     app.stage.addChild(herbivore.body);
 
@@ -64,12 +63,12 @@ function setup() {
     // Start periodical tasks
 
     // Add food at an interval
-    // setInterval(function() {
-    //     let randomCoordinates = generateRandomCoordinates();
-    //     let food = new Food(randomCoordinates.x, randomCoordinates.y);
-    //     foodSources.add(food);
-    //     app.stage.addChild(food.body);
-    // }, 1000 * 2);
+    setInterval(function() {
+        let randomCoordinates = generateRandomCoordinates();
+        let food = new Food(randomCoordinates.x, randomCoordinates.y);
+        foodSources.add(food);
+        app.stage.addChild(food.body);
+    }, 1000 * 2);
 }
 
 function gameloop() {
@@ -79,8 +78,6 @@ function gameloop() {
     
 
 }
-
-setup();
 
 /** Creates a food entity */
 function Food(x, y) {
@@ -150,7 +147,7 @@ function Herbivore(x, y) {
         return circle;
     }
 }
-
+ 
 function generateRandomCoordinates() {
     return {        
         x: Math.floor(Math.random() * appWidth),
