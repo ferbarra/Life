@@ -11,6 +11,8 @@ let Application = PIXI.Application,
 
 let appWidth = window.innerWidth
 let appHeight = window.innerHeight;
+// let appWidth = 400;
+// let appHeight = 400;
 
 // initiate the application
 let app = new Application({
@@ -34,13 +36,13 @@ let startTime;
 let foodSources = new Set();
 
 /** Initiates game state by adding all default creatures */
-let herbivore;
+let herbivores = new Set();
 setup();
  
  /** Initiates game state by adding all default creatures */
  function setup() {
     // Initial Conditions
-    const initialSourcesOfFood = 2;
+    const initialSourcesOfFood = 100;
 
     // add initial food entities.
     for (let i = 0; i < initialSourcesOfFood; i++) {
@@ -49,11 +51,11 @@ setup();
         foodSources.add(food);
         app.stage.addChild(food.body);
     }
-
     // add the initial creatures
     let coordinates = generateRandomCoordinates();
-    herbivore = new Herbivore(coordinates.x, coordinates.y);
-    app.stage.addChild(herbivore.body);
+    let herbivore = new Herbivore(coordinates.x, coordinates.y);
+    herbivores.add(herbivore);
+    app.stage.addChild(herbivore.body);    
 
     app.ticker.add(delta => gameloop(delta));
 
@@ -68,15 +70,29 @@ setup();
         let food = new Food(randomCoordinates.x, randomCoordinates.y);
         foodSources.add(food);
         app.stage.addChild(food.body);
-    }, 1000 * 2);
+    }, 1000 * 1);
 }
 
 function gameloop() {
     
-    herbivore.move();
+    for (let herbivore of herbivores) {
+        herbivore.move();
 
-    
-
+        for (let food of foodSources) {
+            if (eats(herbivore, food)) {
+                app.stage.removeChild(food.body);
+                foodSources.delete(food);
+                herbivore.eat();
+                if (herbivore.readyToReproduce()) {
+                    herbivore.reproduce();
+                    // Create a new herbivore
+                    let newHerbivore = new Herbivore(herbivore.body.x, herbivore.body.y);
+                    herbivores.add(newHerbivore);
+                    app.stage.addChild(newHerbivore.body);
+                }
+            }
+        }
+    }    
 }
 
 /** Creates a food entity */
@@ -106,6 +122,7 @@ function Herbivore(x, y) {
     this.speed = 3;
     this.x_direction = 1;
     this.y_direction = 1;
+    this.nourishment = 0;
     
 
     this.move = function() {
@@ -137,6 +154,18 @@ function Herbivore(x, y) {
         this.body.y += y_velocity;
     }
 
+    this.eat = function() {
+        this.nourishment++;
+    }
+    
+    this.readyToReproduce = function () {
+        return this.nourishment >= 10;
+    }
+    
+    this.reproduce = function () {
+        this.nourishment = 0;
+    }
+
     function createBody(x, y, radius) {
         let circle = new Graphics();
         circle.beginFill(0x0000FF);
@@ -153,4 +182,11 @@ function generateRandomCoordinates() {
         x: Math.floor(Math.random() * appWidth),
         y: Math.floor(Math.random() * appHeight)
     };
+}
+
+function eats(predator, prey) {
+    let x_distance = predator.body.x - prey.body.x;
+    let y_distance = predator.body.y - prey.body.y;
+    let distance = Math.sqrt(x_distance * x_distance + y_distance * y_distance);
+    return distance <= predator.radius;
 }
