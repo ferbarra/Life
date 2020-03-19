@@ -127,8 +127,8 @@ function Herbivore(x, y) {
 
     this.move = function() {
         // One a small chance change its direction.
-        this.x_direction *= Math.random() > 0.95 ? -1 : 1;
-        this.y_direction *= Math.random() > 0.95 ? -1 : 1;        
+        this.x_direction = determineDirection(this.x_direction);
+        this.y_direction = determineDirection(this.y_direction);
 
         let x_velocity = this.speed * this.x_direction;
         let y_velocity = this.speed * this.y_direction;
@@ -174,6 +174,22 @@ function Herbivore(x, y) {
         circle.x = x;
         circle.y = y;
         return circle;
+    }
+
+    function determineDirection(currentDirection) {
+        let newDirection = currentDirection;
+        let directions = [-1, 0, 1];
+        let possibleNewDirections = directions.filter(x => x != currentDirection);
+        var random = Math.random();
+
+        if (random >= 0.95 && random < 0.975) {
+            newDirection = possibleNewDirections[0];
+        }
+
+        if (random >= 0.975) {
+            newDirection = possibleNewDirections[1];
+        }
+        return newDirection; 
     }
 }
  
