@@ -83,15 +83,18 @@ function gameloop() {
                 app.stage.removeChild(food.body);
                 foodSources.delete(food);
                 herbivore.eat();
+                
+                // after the herbivore has eaten everything that it could during the
+                // current iteration, it might be able to reproduce.
                 if (herbivore.readyToReproduce()) {
-                    herbivore.reproduce();
-                    // Create a new herbivore
-                    let newHerbivore = new Herbivore(herbivore.body.x, herbivore.body.y);
+                    let newHerbivore = herbivore.reproduce();
                     herbivores.add(newHerbivore);
                     app.stage.addChild(newHerbivore.body);
                 }
             }
         }
+
+        
     }    
 }
 
@@ -162,8 +165,14 @@ function Herbivore(x, y) {
         return this.nourishment >= 10;
     }
     
+    /**
+     * Returns a descendant of the herbivore at the same position.
+     */
     this.reproduce = function () {
+        // Reproducing costs nourishment.
         this.nourishment = 0;
+
+        return new Herbivore(this.body.x, this.body.y, this.radius);
     }
 
     function createBody(x, y, radius) {
