@@ -42,10 +42,10 @@ setup();
  /** Initiates game state by adding all default creatures */
  function setup() {
     // Initial Conditions
-    const initialSourcesOfFood = 100;
+    const initialSourcesOfFood = 1;
 
     // add initial food entities.
-    for (let i = 0; i < initialSourcesOfFood; i++) {
+    for (let i = 0; i < config.initialFoodSources; i++) {
         let coordinates = generateRandomCoordinates();
         let food = new Food(coordinates.x, coordinates.y);
         foodSources.add(food);
@@ -70,7 +70,7 @@ setup();
         let food = new Food(randomCoordinates.x, randomCoordinates.y);
         foodSources.add(food);
         app.stage.addChild(food.body);
-    }, 1000 * 1);
+    }, config.foodSpanInterval);
 }
 
 function gameloop() {
@@ -83,19 +83,24 @@ function gameloop() {
                 app.stage.removeChild(food.body);
                 foodSources.delete(food);
                 herbivore.eat();
+                
+                // after the herbivore has eaten everything that it could during the
+                // current iteration, it might be able to reproduce.
                 if (herbivore.readyToReproduce()) {
-                    herbivore.reproduce();
-                    // Create a new herbivore
-                    let newHerbivore = new Herbivore(herbivore.body.x, herbivore.body.y);
+                    let newHerbivore = herbivore.reproduce();
                     herbivores.add(newHerbivore);
                     app.stage.addChild(newHerbivore.body);
                 }
             }
         }
+
+        
     }    
 }
 
-/** Creates a food entity */
+/** Creates a food entity. It doesn't move nor reproduce. It stays still
+ *  waiting to be eaten. What a noble creature.
+ */
 function Food(x, y) {
     this.body = createBody(x, y);
 
@@ -162,8 +167,14 @@ function Herbivore(x, y) {
         return this.nourishment >= 10;
     }
     
+    /**
+     * Returns a descendant of the herbivore at the same position.
+     */
     this.reproduce = function () {
+        // Reproducing costs nourishment.
         this.nourishment = 0;
+
+        return new Herbivore(this.body.x, this.body.y, this.radius);
     }
 
     function createBody(x, y, radius) {
