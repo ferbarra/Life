@@ -42,10 +42,10 @@ setup();
  /** Initiates game state by adding all default creatures */
  function setup() {
     // Initial Conditions
-    const initialSourcesOfFood = 100;
+    const initialSourcesOfFood = 1;
 
     // add initial food entities.
-    for (let i = 0; i < initialSourcesOfFood; i++) {
+    for (let i = 0; i < config.initialFoodSources; i++) {
         let coordinates = generateRandomCoordinates();
         let food = new Food(coordinates.x, coordinates.y);
         foodSources.add(food);
@@ -70,7 +70,7 @@ setup();
         let food = new Food(randomCoordinates.x, randomCoordinates.y);
         foodSources.add(food);
         app.stage.addChild(food.body);
-    }, 1000 * 1);
+    }, config.foodSpanInterval);
 }
 
 function gameloop() {
@@ -98,7 +98,9 @@ function gameloop() {
     }    
 }
 
-/** Creates a food entity */
+/** Creates a food entity. It doesn't move nor reproduce. It stays still
+ *  waiting to be eaten. What a noble creature.
+ */
 function Food(x, y) {
     this.body = createBody(x, y);
 
