@@ -9,10 +9,10 @@ let Application = PIXI.Application,
     Texture = PIXI.Texture,
     loader = PIXI.Loader.shared.loader;
 
-let appWidth = window.innerWidth
-let appHeight = window.innerHeight;
-// let appWidth = 400;
-// let appHeight = 400;
+// let appWidth = window.innerWidth
+// let appHeight = window.innerHeight;
+let appWidth = 300;
+let appHeight = 300;
 
 // initiate the application
 let app = new Application({
@@ -34,13 +34,15 @@ document.body.appendChild(app.view);
 // Globals
 let startTime;
 let foodSources = new Set();
+// Partition the stage to improve performance
+let partitionedStage = new Partitions(appWidth, appHeight, 6, 6);
 
 /** Initiates game state by adding all default creatures */
 let herbivores = new Set();
 setup();
  
  /** Initiates game state by adding all default creatures */
- function setup() {
+function setup() {
     // Initial Conditions
     const initialSourcesOfFood = 1;
 
@@ -55,8 +57,8 @@ setup();
     let coordinates = generateRandomCoordinates();
     let herbivore = new Herbivore(coordinates.x, coordinates.y);
     herbivores.add(herbivore);
-    app.stage.addChild(herbivore.body);    
-
+    app.stage.addChild(herbivore.body);
+    partitionedStage.add(herbivore.body.x, herbivore.body.y, herbivore);
     app.ticker.add(delta => gameloop(delta));
 
     // Set the start time to now.
@@ -92,9 +94,7 @@ function gameloop() {
                     app.stage.addChild(newHerbivore.body);
                 }
             }
-        }
-
-        
+        }        
     }    
 }
 
@@ -122,7 +122,7 @@ function Food(x, y) {
  * @param {*} y vertical coordinate
  */
 function Herbivore(x, y) {
-    this.radius = 10;
+    this.radius = 40;
     this.body = createBody(x, y, this.radius);
     this.speed = 3;
     this.x_direction = 1;
@@ -217,3 +217,5 @@ function eats(predator, prey) {
     let distance = Math.sqrt(x_distance * x_distance + y_distance * y_distance);
     return distance <= predator.radius;
 }
+
+module.exports = eats;
